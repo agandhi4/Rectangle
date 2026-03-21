@@ -132,7 +132,8 @@ enum WindowAction: Int, Codable {
          bottomLeftSixteenth = 116,
          bottomCenterLeftSixteenth = 117,
          bottomCenterRightSixteenth = 118,
-         bottomRightSixteenth = 119
+         bottomRightSixteenth = 119,
+         gridOverlay = 120
 
     // Order matters here - it's used in the menu
     static let active = [leftHalf, rightHalf, centerHalf, topHalf, bottomHalf,
@@ -163,7 +164,8 @@ enum WindowAction: Int, Codable {
                          halveHeightUp, halveHeightDown, halveWidthLeft, halveWidthRight,
                          tileAll, cascadeAll,
                          leftTodo, rightTodo,
-                         cascadeActiveApp, tileActiveApp
+                         cascadeActiveApp, tileActiveApp,
+                         gridOverlay
     ]
 
     func post() {
@@ -314,6 +316,7 @@ enum WindowAction: Int, Codable {
         case .bottomCenterLeftSixteenth: return "bottomCenterLeftSixteenth"
         case .bottomCenterRightSixteenth: return "bottomCenterRightSixteenth"
         case .bottomRightSixteenth: return "bottomRightSixteenth"
+        case .gridOverlay: return "gridOverlay"
         }
     }
 
@@ -502,6 +505,9 @@ enum WindowAction: Int, Codable {
             return nil
         case .specified, .reverseAll, .tileAll, .cascadeAll, .leftTodo, .rightTodo, .cascadeActiveApp, .tileActiveApp:
             return nil
+        case .gridOverlay:
+            key = "gridOverlay.title"
+            value = "Grid Overlay"
         case .centerProminently, .largerWidth, .smallerWidth, .largerHeight, .smallerHeight:
             return nil
         case .topVerticalThird, .middleVerticalThird, .bottomVerticalThird, .topVerticalTwoThirds, .bottomVerticalTwoThirds:
@@ -618,7 +624,7 @@ enum WindowAction: Int, Codable {
     
     var isDragSnappable: Bool {
         switch self {
-        case .restore, .previousDisplay, .nextDisplay, .moveUp, .moveDown, .moveLeft, .moveRight, .specified, .reverseAll, .tileAll, .cascadeAll, .larger, .smaller, .largerWidth, .smallerWidth, .cascadeActiveApp, .tileActiveApp,
+        case .restore, .previousDisplay, .nextDisplay, .moveUp, .moveDown, .moveLeft, .moveRight, .specified, .reverseAll, .tileAll, .cascadeAll, .larger, .smaller, .largerWidth, .smallerWidth, .cascadeActiveApp, .tileActiveApp, .gridOverlay,
             // Ninths
             .topLeftNinth, .topCenterNinth, .topRightNinth, .middleLeftNinth, .middleCenterNinth, .middleRightNinth, .bottomLeftNinth, .bottomCenterNinth, .bottomRightNinth,
             // Corner thirds
@@ -764,6 +770,7 @@ enum WindowAction: Int, Codable {
         case .rightTodo: return NSImage()
         case .cascadeActiveApp: return NSImage()
         case .tileActiveApp: return NSImage()
+        case .gridOverlay: return NSImage()
         case .centerProminently: return NSImage()
         case .largerWidth: return NSImage(imageLiteralResourceName: "largerWidthTemplate")
         case .smallerWidth: return NSImage(imageLiteralResourceName: "smallerWidthTemplate")
@@ -852,7 +859,7 @@ enum WindowAction: Int, Codable {
             return Defaults.applyGapsToMaximize.userDisabled ? .none : .both;
         case .maximizeHeight:
             return Defaults.applyGapsToMaximizeHeight.userDisabled ? .none : .vertical;
-        case .almostMaximize, .previousDisplay, .nextDisplay, .larger, .smaller, .largerWidth, .smallerWidth, .largerHeight, .smallerHeight, .center, .centerProminently, .restore, .specified, .reverseAll, .tileAll, .cascadeAll, .cascadeActiveApp, .tileActiveApp:
+        case .almostMaximize, .previousDisplay, .nextDisplay, .larger, .smaller, .largerWidth, .smallerWidth, .largerHeight, .smallerHeight, .center, .centerProminently, .restore, .specified, .reverseAll, .tileAll, .cascadeAll, .cascadeActiveApp, .tileActiveApp, .gridOverlay:
             return .none
         }
     }
