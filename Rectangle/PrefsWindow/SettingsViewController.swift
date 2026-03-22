@@ -107,6 +107,14 @@ class SettingsViewController: NSViewController {
         Notification.Name.allowAnyShortcut.post(object: newSetting)
     }
     
+    @objc func gridColsChanged(_ sender: NSPopUpButton) {
+        Defaults.gridOverlayCols.value = sender.selectedTag()
+    }
+
+    @objc func gridRowsChanged(_ sender: NSPopUpButton) {
+        Defaults.gridOverlayRows.value = sender.selectedTag()
+    }
+
     @objc func toggleShowAdditionalSizesInMenu(_ sender: NSButton) {
         let enabled: Bool = sender.state == .on
         Defaults.showAdditionalSizesInMenu.enabled = enabled
@@ -830,6 +838,69 @@ class SettingsViewController: NSViewController {
             mainStackView.addArrangedSubview(twelfthsCyclingRow)
             mainStackView.addArrangedSubview(sixteenthsCyclingRow)
 
+            // Grid Overlay shortcut
+            let gridOverlayLabel = NSTextField(labelWithString: NSLocalizedString("gridOverlay.title", tableName: "Main", value: "Grid Overlay", comment: ""))
+            gridOverlayLabel.alignment = .right
+            gridOverlayLabel.translatesAutoresizingMaskIntoConstraints = false
+
+            let gridOverlayShortcutView = MASShortcutView(frame: NSRect(x: 0, y: 0, width: 160, height: 19))
+            gridOverlayShortcutView.setAssociatedUserDefaultsKey(WindowAction.gridOverlay.name, withTransformerName: MASDictionaryTransformerName)
+
+            if Defaults.allowAnyShortcut.enabled {
+                let passThroughValidator = PassthroughShortcutValidator()
+                gridOverlayShortcutView.shortcutValidator = passThroughValidator
+            }
+
+            let gridOverlayLabelStack = makeLabelStack(gridOverlayLabel, NSImageView())
+            let gridOverlayRow = makeRow(gridOverlayLabelStack, gridOverlayShortcutView)
+            mainStackView.addArrangedSubview(gridOverlayRow)
+
+            // Grid size picker (cols × rows)
+            let gridSizeLabel = NSTextField(labelWithString: NSLocalizedString("gridOverlaySize.title", tableName: "Main", value: "Grid Size", comment: ""))
+            gridSizeLabel.alignment = .right
+            gridSizeLabel.translatesAutoresizingMaskIntoConstraints = false
+
+            let gridSizeValues = Array(2...16)
+
+            let colsPopup = NSPopUpButton(frame: .zero, pullsDown: false)
+            for val in gridSizeValues {
+                colsPopup.addItem(withTitle: "\(val)")
+                colsPopup.lastItem?.tag = val
+            }
+            colsPopup.selectItem(withTag: max(2, Defaults.gridOverlayCols.value))
+            colsPopup.target = self
+            colsPopup.action = #selector(gridColsChanged(_:))
+            colsPopup.translatesAutoresizingMaskIntoConstraints = false
+
+            let timesLabel = NSTextField(labelWithString: "×")
+            timesLabel.translatesAutoresizingMaskIntoConstraints = false
+
+            let rowsPopup = NSPopUpButton(frame: .zero, pullsDown: false)
+            for val in gridSizeValues {
+                rowsPopup.addItem(withTitle: "\(val)")
+                rowsPopup.lastItem?.tag = val
+            }
+            rowsPopup.selectItem(withTag: max(2, Defaults.gridOverlayRows.value))
+            rowsPopup.target = self
+            rowsPopup.action = #selector(gridRowsChanged(_:))
+            rowsPopup.translatesAutoresizingMaskIntoConstraints = false
+
+            let gridSizeControls = NSStackView()
+            gridSizeControls.orientation = .horizontal
+            gridSizeControls.alignment = .centerY
+            gridSizeControls.spacing = 4
+            gridSizeControls.addArrangedSubview(colsPopup)
+            gridSizeControls.addArrangedSubview(timesLabel)
+            gridSizeControls.addArrangedSubview(rowsPopup)
+
+            let gridSizeLabelStack = makeLabelStack(gridSizeLabel, NSImageView())
+            let gridSizeRow = NSStackView()
+            gridSizeRow.orientation = .horizontal
+            gridSizeRow.alignment = .centerY
+            gridSizeRow.spacing = 18
+            gridSizeRow.addArrangedSubview(gridSizeLabelStack)
+            gridSizeRow.addArrangedSubview(gridSizeControls)
+            mainStackView.addArrangedSubview(gridSizeRow)
 
             mainStackView.addArrangedSubview(splitRatioHeaderLabel)
             mainStackView.setCustomSpacing(10, after: splitRatioHeaderLabel)
@@ -857,7 +928,9 @@ class SettingsViewController: NSViewController {
                 bottomRightEighthLabel.widthAnchor.constraint(equalTo: ninthsCyclingLabel.widthAnchor),
                 ninthsCyclingLabel.widthAnchor.constraint(equalTo: twelfthsCyclingLabel.widthAnchor),
                 twelfthsCyclingLabel.widthAnchor.constraint(equalTo: sixteenthsCyclingLabel.widthAnchor),
-                sixteenthsCyclingLabel.widthAnchor.constraint(equalTo: hSplitLabel.widthAnchor),
+                sixteenthsCyclingLabel.widthAnchor.constraint(equalTo: gridOverlayLabel.widthAnchor),
+                gridOverlayLabel.widthAnchor.constraint(equalTo: gridSizeLabel.widthAnchor),
+                gridSizeLabel.widthAnchor.constraint(equalTo: hSplitLabel.widthAnchor),
                 hSplitLabel.widthAnchor.constraint(equalTo: vSplitLabel.widthAnchor),
                 largerWidthLabelStack.widthAnchor.constraint(equalTo: smallerWidthLabelStack.widthAnchor),
                 largerWidthShortcutView.widthAnchor.constraint(equalToConstant: 160),
@@ -900,6 +973,9 @@ class SettingsViewController: NSViewController {
                 ninthsCyclingShortcutView.leadingAnchor.constraint(equalTo: largerWidthShortcutView.leadingAnchor),
                 twelfthsCyclingShortcutView.leadingAnchor.constraint(equalTo: largerWidthShortcutView.leadingAnchor),
                 sixteenthsCyclingShortcutView.leadingAnchor.constraint(equalTo: largerWidthShortcutView.leadingAnchor),
+                gridOverlayShortcutView.widthAnchor.constraint(equalToConstant: 160),
+                gridOverlayShortcutView.leadingAnchor.constraint(equalTo: largerWidthShortcutView.leadingAnchor),
+                gridSizeControls.leadingAnchor.constraint(equalTo: largerWidthShortcutView.leadingAnchor),
                 gridHeaderLabel.widthAnchor.constraint(equalTo: mainStackView.widthAnchor),
                 cyclingHintLabel.widthAnchor.constraint(equalTo: mainStackView.widthAnchor, constant: -20),
                 hSplitField.trailingAnchor.constraint(equalTo: largerWidthShortcutView.trailingAnchor),
